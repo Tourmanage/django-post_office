@@ -5,6 +5,11 @@ from django.utils.text import Truncator
 from .fields import CommaSeparatedEmailField
 from .models import Email, Log, EmailTemplate, STATUS
 
+try:
+    from modeltranslation.admin import TranslationAdmin
+except ImportError:
+    from django.contrib.admin import ModelAdmin as TranslationAdmin
+
 
 def get_message_preview(instance):
     return (u'{0}...'.format(instance.message[:25]) if len(instance.message) > 25
@@ -60,7 +65,7 @@ class LogAdmin(admin.ModelAdmin):
     list_display = ('date', 'email', 'status', get_message_preview)
 
 
-class EmailTemplateAdmin(admin.ModelAdmin):
+class EmailTemplateAdmin(TranslationAdmin):
     list_display = ('name', 'description_shortened', 'subject', 'created')
     search_fields = ('name', 'description', 'subject')
     fieldsets = [
@@ -76,7 +81,6 @@ class EmailTemplateAdmin(admin.ModelAdmin):
         return Truncator(instance.description.split('\n')[0]).chars(200)
     description_shortened.short_description = 'description'
     description_shortened.admin_order_field = 'description'
-
 
 admin.site.register(Email, EmailAdmin)
 admin.site.register(Log, LogAdmin)
